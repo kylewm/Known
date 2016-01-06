@@ -9,21 +9,38 @@
         class Endpoint extends \Idno\Common\Page
         {
 
+            private function getHubServiceAccounts($content_type = 'note')
+            {
+                if (\Idno\Core\Idno::site()->hub()) {
+                    $result = \Idno\Core\Idno::site()->hub()->makeCall('hub/user/syndication', [
+                        'content_type' => false,
+                    ]);
+
+                    if (!empty($result['content'])) {
+                        $content = $result['content'];
+                        \Idno\Core\Idno::site()->logging()->log('Received info from hub! ' . json_encode($content));
+                    }
+                }
+            }
+
             function get($params = array())
             {
                 $this->gatekeeper();
                 if ($query = trim($this->getInput('q'))) {
                     switch ($query) {
                     case 'syndicate-to':
+                        $account_strings = \Idno\Core\Idno::site()->syndication()->getServiceAccountStrings();
+                        $account_data    = \Idno\Core\Idno::site()->syndication()->getServiceAccountData();
+
                         if ($this->isAcceptedContentType('application/json')) {
                             header('Content-Type: application/json');
                             echo json_encode([
-                                'syndicate-to'          => \Idno\Core\Idno::site()->syndication()->getServiceAccountStrings(),
-                                'syndicate-to-expanded' => \Idno\Core\Idno::site()->syndication()->getServiceAccountData(),
+                                'syndicate-to'          => $account_strings,
+                                'syndicate-to-expanded' => $account_data,
                             ], JSON_PRETTY_PRINT);
                         } else {
                             echo http_build_query([
-                                "syndicate-to" => \Idno\Core\Idno::site()->syndication()->getServiceAccountStrings(),
+                                "syndicate-to" => $account_strings,
                             ]);
                         }
                         break;
