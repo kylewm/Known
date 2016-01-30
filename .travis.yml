@@ -46,6 +46,7 @@ before_script:
   - if [[ "$DB" == "sqlite3" ]]; then echo "PROVISIONING WITH Sqlite"; fi
   - if [[ "$DB" == "sqlite3" ]]; then sudo cp -f Tests/build/config_sqlite3.ini $TRAVIS_BUILD_DIR/config.ini; fi
   - sudo cp -f $TRAVIS_BUILD_DIR/htaccess.dist $TRAVIS_BUILD_DIR/.htaccess
+  - composer install
   # Restart services
   - sudo service apache2 restart
 
@@ -55,11 +56,11 @@ services:
 after_failure:
   - sudo cat $TRAVIS_BUILD_DIR/apache-error.log
 
-notifications:
-  email:
-    - hello@withknown.com
-  irc:
-    channels:
-      - "irc.freenode.net#knownchat"
-    on_success: change
-    on_failure: always
+# notifications:
+#   email:
+#     - hello@withknown.com
+#   irc:
+#     channels:
+#       - "irc.freenode.net#knownchat"
+#     on_success: change
+#     on_failure: always
