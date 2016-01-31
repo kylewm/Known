@@ -40,9 +40,9 @@
                         header('Location: ' . \Idno\Core\Idno::site()->config()->forward_on_empty);
                         exit;
                     } else {
-                        
+
                         http_response_code(500);
-                        
+
                         if (\Idno\Core\Idno::site()->config()->debug) {
                             $message = '<p>' . $e->getMessage() . '</p>';
                             $message .= '<p>' . $connection_string . '</p>';
@@ -157,7 +157,7 @@
                     $contents = json_encode($array);
                 } catch (\Exception $e) {
                     $contents = json_encode([]);
-                    \Idno\Core\Idno::site()->logging()->log($e->getMessage());
+                    \Idno\Core\Idno::site()->logging()->error($e->getMessage());
                     return false;
                 }
                 $search   = '';
@@ -218,7 +218,7 @@
                                         $value = json_encode($value);
                                     } catch (\Exception $e) {
                                         $value = json_encode([]);
-                                        \Idno\Core\Idno::site()->logging()->log($e->getMessage());
+                                        \Idno\Core\Idno::site()->logging()->error($e->getMessage());
                                     }
                                 }
                                 if (empty($value)) {
@@ -234,7 +234,7 @@
                     }
                 } catch (\Exception $e) {
                     error_log($e->getMessage());
-                    //\Idno\Core\Idno::site()->logging()->log($e->getMessage());
+                    //\Idno\Core\Idno::site()->logging()->error($e->getMessage());
                 }
 
                 return false;
@@ -273,13 +273,13 @@
             {
                 try {
                     $collection = $this->sanitiseCollection($collection);
-                    
+
                     $statement = $this->client->prepare("select distinct {$collection}.* from " . $collection . " where uuid = :uuid");
                     if ($statement->execute(array(':uuid' => $uuid))) {
                         return $statement->fetch(\PDO::FETCH_ASSOC);
                     }
                 } catch (\Exception $e) {
-                    \Idno\Core\Idno::site()->logging()->log($e->getMessage());
+                    \Idno\Core\Idno::site()->logging()->error($e->getMessage());
                 }
 
                 return false;
@@ -319,7 +319,7 @@
             function getRecord($id, $collection = 'entities')
             {
                 $collection = $this->sanitiseCollection($collection);
-                
+
                 $statement = $this->client->prepare("select {$collection}.* from " . $collection . " where _id = :id");
                 if ($statement->execute(array(':id' => $id))) {
                     return $statement->fetch(\PDO::FETCH_ASSOC);
@@ -338,7 +338,7 @@
             {
                 try {
                     $collection = $this->sanitiseCollection($collection);
-                
+
                     $statement = $this->client->prepare("select {$collection}.* from " . $collection . " limit 1");
                     if ($statement->execute()) {
                         if ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
@@ -446,7 +446,7 @@
             {
                 try {
                     $collection = $this->sanitiseCollection($collection);
-                    
+
                     // Build query
                     $query            = "select distinct {$collection}.* from {$collection} ";
                     $variables        = array();
@@ -475,7 +475,7 @@
                     }
 
                 } catch (\Exception $e) {
-                    \Idno\Core\Idno::site()->logging()->log($e->getMessage());
+                    \Idno\Core\Idno::site()->logging()->error($e->getMessage());
                     return false;
                 }
 
@@ -676,7 +676,7 @@
                 try {
 
                     $collection = $this->sanitiseCollection($collection);
-                    
+
                     // Build query
                     $query            = "select count(distinct {$collection}.uuid) as total from {$collection} ";
                     $variables        = array();
@@ -700,7 +700,7 @@
                     }
 
                 } catch (Exception $e) {
-                    \Idno\Core\Idno::site()->logging()->log($e->getMessage());
+                    \Idno\Core\Idno::site()->logging()->error($e->getMessage());
                     return false;
                 }
 
@@ -730,7 +730,7 @@
                 try {
 
                     $collection = $this->sanitiseCollection($collection);
-                    
+
                     $client = $this->client;
                     /* @var \PDO $client */
                     $statement = $client->prepare("delete from {$collection} where _id = :id");
@@ -742,7 +742,7 @@
 
                 } catch (\Exception $e) {
 
-                    \Idno\Core\Idno::site()->logging()->log($e->getMessage());
+                    \Idno\Core\Idno::site()->logging()->error($e->getMessage());
                     return false;
 
                 }
@@ -785,7 +785,7 @@
                         return $statement->fetchAll(\PDO::FETCH_OBJ);
                     }
                 } catch (\Exception $e) {
-                    //\Idno\Core\Idno::site()->logging()->log($e->getMessage());
+                    //\Idno\Core\Idno::site()->logging()->error($e->getMessage());
                     error_log($e->getMessage());
                 }
 

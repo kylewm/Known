@@ -9,13 +9,12 @@
 
     namespace Idno\Core {
 
-        class Logging extends \Idno\Common\Component
+        class Logging extends \Idno\Common\Component implements \Psr\Log\LoggerInterface
         {
-            public $loglevel_filter = 4;
-            private $identifier;
 
-            private $contexts = [];
-                
+            private $monolog;
+            private $logHandler;
+
             /**
              * Create a basic logger to log to the PHP log.
              *
@@ -24,14 +23,21 @@
              */
             public function __construct($loglevel_filter = 0, $identifier = null)
             {
-                if (!$identifier) $identifier = \Idno\Core\Idno::site()->config->host;
-                if (isset(\Idno\Core\Idno::site()->config->loglevel)) {
-                    $loglevel_filter = \Idno\Core\Idno::site()->config->loglevel;
+                if (!$identifier) {
+                    $identifier = \Idno\Core\Idno::site()->config->host;
                 }
 
-                $this->loglevel_filter = $loglevel_filter;
-                $this->identifier      = $identifier;
-                $this->contexts        = [];
+                $this->monolog = new \Monolog\Logger($identifier);
+                if (isset(\Idno\Core\Idno::site()->config->logfile)) {
+                    $this->logHandler = new \Monolog\Handler\StreamHandler(\Idno\Core\Idno::site()->config->logfile);
+                } else {
+                    $this->logHandler = new \Monolog\Handler\ErrorLogHandler();
+                }
+
+                $this->monolog->pushHandler($this->logHandler);
+                if (isset(\Idno\Core\Idno::site()->config->loglevel)) {
+                    $this->setLogLevel(\Idno\Core\Idno::site()->config->loglevel);
+                }
             }
 
             /**
@@ -40,79 +46,166 @@
              */
             public function setLogLevel($loglevel)
             {
-                $this->loglevel_filter = $loglevel;
-            }
-            
-            /**
-             * Set the context
-             */
-            public function setContext($context) {
-                $this->clearContexts();
-                $this->pushContext($context);
-            }
-            
-            /**
-             * Clear logging contexts.
-             */
-            public function clearContexts() {
-                $this->contexts = [];
-            }
-            
-            /**
-             * Push a context onto log.
-             * @param type $context
-             */
-            public function pushContext($context) {
-                array_push($this->contexts, trim($context));
-            }
-            
-            /**
-             * Remove a logging context from the stack
-             * @return context
-             */
-            public function popContext() {
-                return array_pop($this->contexts);
+                $this->logHandler->setLevel(self::toPsrLevel($loglevel));
             }
 
             /**
-             * Write a message to the log.
-             * @param type $message
-             * @param type $level
+             * System is unusable.
+             *
+             * @param string $message
+             * @param array  $context
+             *
+             * @return null
              */
-            public function log($message, $level = 3)
+            public function emergency($message, array $context = array())
             {
+                return $this->monolog->emergency($message, $context);
+            }
 
-                // See if this message isn't filtered out
-                if ($level <= $this->loglevel_filter) {
+            /**
+             * Action must be taken immediately.
+             *
+             * Example: Entire website down, database unavailable, etc. This should
+             * trigger the SMS alerts and wake you up.
+             *
+             * @param string $message
+             * @param array  $context
+             *
+             * @return null
+             */
+            public function alert($message, array $context = array())
+            {
+                return $this->monolog->alert($message, $context);
+            }
 
-                    // Construct log message
+            /**
+             * Critical conditions.
+             *
+             * Example: Application component unavailable, unexpected exception.
+             *
+             * @param string $message
+             * @param array  $context
+             *
+             * @return null
+             */
+            public function critical($message, array $context = array())
+            {
+                return $this->monolog->critical($message, $context);
+            }
 
-                    // Trace for debug (when filtering is set to debug, always add a trace)
-                    $trace = "";
-                    if ($this->loglevel_filter == 4) {
-                        $backtrace = @debug_backtrace(false, 2);
-                        if ($backtrace) {
-                            // Never show this
-                            $backtrace = $backtrace[0];
+            /**
+             * Runtime errors that do not require immediate action but should typically
+             * be logged and monitored.
+             *
+             * @param string $message
+             * @param array  $context
+             *
+             * @return null
+             */
+            public function error($message, array $context = array())
+            {
+                return $this->monolog->error($message, $context);
+            }
 
-                            $trace = " [{$backtrace['file']}:{$backtrace['line']}]";
-                        }
-                    }
+            /**
+             * Exceptional occurrences that are not errors.
+             *
+             * Example: Use of deprecated APIs, poor use of an API, undesirable things
+             * that are not necessarily wrong.
+             *
+             * @param string $message
+             * @param array  $context
+             *
+             * @return null
+             */
+            public function warning($message, array $context = array())
+            {
+                return $this->monolog->warning($message, $context);
+            }
 
-                    // Level
-                    if ($level == 1) $level = "ERROR";
-                    if ($level == 2) $level = "WARNING";
-                    if ($level == 3) $level = "INFO";
-                    if ($level == 4) $level = "DEBUG";
+            /**
+             * Normal but significant events.
+             *
+             * @param string $message
+             * @param array  $context
+             *
+             * @return null
+             */
+            public function notice($message, array $context = array())
+            {
+                return $this->monolog->notice($message, $context);
+            }
 
-                    // Logging contexts
-                    $contexts = '';
-                    if (!empty($this->contexts)) {
-                        $contexts = ' ['.implode(';', $this->contexts).']';
-                    }
-                    
-                    error_log("Known ({$this->identifier}$contexts): $level - $message{$trace}");
+            /**
+             * Interesting events.
+             *
+             * Example: User logs in, SQL logs.
+             *
+             * @param string $message
+             * @param array  $context
+             *
+             * @return null
+             */
+            public function info($message, array $context = array())
+            {
+                return $this->monolog->info($message, $context);
+            }
+
+            /**
+             * Detailed debug information.
+             *
+             * @param string $message
+             * @param array  $context
+             *
+             * @return null
+             */
+            public function debug($message, array $context = array())
+            {
+                return $this->monolog->debug($message, $context);
+            }
+
+            /**
+             * Logs with an arbitrary level.
+             *
+             * @param mixed  $level
+             * @param string $message
+             * @param array  $context
+             *
+             * @return null
+             */
+            public function log($level, $message=LOGLEVEL_INFO, array $context = array())
+            {
+                // Backward compatibility with the old signature, log($message, $level).
+                // This is also why the default value of $message is LOGLEVEL_INFO for now.
+                if (is_int($message) && is_string($message)) {
+                    // TODO tack on a warning that this method might go away eventually
+                    $idnoLevel = $message;
+                    $message = $level;
+                    $level = self::toPsrLevel($idnoLevel);
                 }
+
+                return $this->monolog->log($level, $message, $context);
+            }
+
+            /**
+             * Convert a (possibly) old-style integral log level to a
+             * \Psr\Log\LogLevel
+             * @param mixed $level
+             *
+             * @return string
+             */
+            private static function toPsrLevel($level) {
+                if (is_string($level)) {
+                    return $level; // probably already PSR
+                }
+                switch($level) {
+                case LOGLEVEL_DEBUG:   return \Psr\Log\LogLevel::DEBUG;
+                case LOGLEVEL_INFO:    return \Psr\Log\LogLevel::INFO;
+                case LOGLEVEL_WARNING: return \Psr\Log\LogLevel::WARNING;
+                case LOGLEVEL_ERROR:   return \Psr\Log\LogLevel::ERROR;
+                }
+
+                return \Psr\Log\LogLevel::ERROR; // Shouldn't get here.
             }
         }
 
