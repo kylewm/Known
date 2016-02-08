@@ -427,7 +427,7 @@
 
                 return '';
             }
-            
+
             /**
              * Publishes this entity - either creating a new entry, or
              * overwriting the existing one. Then it will add it optionally
@@ -436,7 +436,7 @@
              *
              * @param bool $add_to_feed If set to true, will add this item to the activity stream feed if this object is being newly created
              * @param string $feed_verb If this item is added to the feed, this is the verb that will be used
-             */   
+             */
             function publish($add_to_feed = false, $feed_verb = 'post')
             {
                 if ($this->save()) {
@@ -449,7 +449,7 @@
                     return false;
                 }
             }
-            
+
             /**
              * Saves this entity - either creating a new entry, or
              * overwriting the existing one.

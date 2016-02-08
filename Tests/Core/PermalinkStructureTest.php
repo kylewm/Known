@@ -21,6 +21,9 @@ namespace Tests\Core {
             return $entity;
         }
 
+        /**
+         *
+         */
         public function testPermalinks()
         {
             $entity = $this->createEntry();
@@ -36,7 +39,6 @@ namespace Tests\Core {
             $this->assertEquals('/:year/:slug', Idno::site()->config()->getPermalinkStructure());
             $this->assertEquals("$base$year/$slug", $entity->getURL());
             $response = HttpTestClient::get($entity->getURL());
-            print_r($response);
             $this->assertEquals(200, $response['response']);
             $this->assertContains('hamstring baseball duckbill firecracker', $response['content']);
 
@@ -45,7 +47,6 @@ namespace Tests\Core {
             Idno::site()->config()->save();
             $this->assertEquals("$base$year/$month/$slug", $entity->getURL());
             $response = HttpTestClient::get($entity->getURL());
-            print_r($response);
             $this->assertEquals(200, $response['response']);
             $this->assertContains('hamstring baseball duckbill firecracker', $response['content']);
 

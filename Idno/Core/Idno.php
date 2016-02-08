@@ -374,7 +374,7 @@
                 if (empty($this->language)) {
                     $this->language = new Language();
                 }
-                
+
                 return $this->language;
             }
 
@@ -812,6 +812,14 @@
             static function &site()
             {
                 return self::$site;
+            }
+
+            function run()
+            {
+                $router = new Router($this->pagehandlers);
+                $request = \Idno\Common\Request::createFromGlobals();
+                $response = $router->serve($request);
+                $response->send();
             }
 
         }

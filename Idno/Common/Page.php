@@ -30,12 +30,11 @@
             // variable
             public $data = array();
 
-            // Stores the response code that we'll be sending back. Can be
-            // changed with setResponse
-            public $response = 200;
+            // @var \Idno\Common\Request
+            public $request;
 
-            // Stores the response headers we'll be sending back.
-            public $responseHeaders = array();
+            // @var \Idno\Common\Response
+            public $response;
 
             // Stores arguments given to page handlers, for parsing of regular
             // expression matches
@@ -56,6 +55,7 @@
 
             function init()
             {
+                $this->response = new Response();
                 $this->setResponseHeader('X-Powered-By: https://withknown.com');
                 $this->setResponseHeader('X-Clacks-Overhead: GNU Terry Pratchett');
 
