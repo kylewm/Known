@@ -31,8 +31,7 @@
                 } catch (\Exception $e) {
                     error_log($e->getMessage());
                     if (!empty(\Idno\Core\Idno::site()->config()->forward_on_empty)) {
-                        header('Location: ' . \Idno\Core\Idno::site()->config()->forward_on_empty);
-                        exit;
+                        $this->forward(\Idno\Core\Idno::site()->config()->forward_on_empty);
                     } else {
 
                         http_response_code(500);

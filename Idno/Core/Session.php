@@ -22,7 +22,9 @@
                 ini_set('session.cookie_lifetime', 60 * 60 * 24 * 7); // Persistent cookies
                 ini_set('session.gc_maxlifetime', 60 * 60 * 24 * 7); // Garbage collection to match
 
-                header('P3P: CP="CAO PSA OUR"');
+                if (!defined('KNOWN_UNIT_TEST')) {
+                    header('P3P: CP="CAO PSA OUR"');
+                }
                 ini_set('session.cookie_httponly', true); // Restrict cookies to HTTP only (help reduce XSS attack profile)
                 ini_set('session.use_strict_mode', true); // Help mitigate session fixation
                 if (Idno::site()->isSecure()) {
@@ -55,7 +57,7 @@
                 } catch (\Exception $ex) {
                     // Session didn't validate, log & destroy
                     \Idno\Core\Idno::site()->logging->log($ex->getMessage(), LOGLEVEL_ERROR);
-                    
+
                     $_SESSION = [];
                     session_destroy();
                 }
@@ -321,11 +323,11 @@
             {
                 unset($_SESSION['user_uuid']);
                 unset($this->user);
-                
+
                 // Unset all session variables, as per PHP docs.
                 $_SESSION = [];
-                
-                // Really log the user off by destroying the cookie 
+
+                // Really log the user off by destroying the cookie
                 // See https://secure.php.net/manual/en/function.session-destroy.php
                 if (!defined('KNOWN_UNIT_TEST')) {
                     if (ini_get("session.use_cookies")) {
@@ -336,7 +338,7 @@
                         );
                     }
                 }
-                
+
                 @session_destroy();
 
                 return true;

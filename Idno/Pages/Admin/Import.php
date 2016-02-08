@@ -43,8 +43,8 @@
 
                 ignore_user_abort(true);    // This is dangerous, but we need export to continue
 
-                header('Connection: close');
-                header('Content-length: ' . (string)ob_get_length());
+                $this->setResponseHeader('Connection: close');
+                $this->setResponseHeader('Content-length: ' . (string)ob_get_length());
 
                 @ob_end_flush();            // Return output to the browser
                 @ob_end_clean();

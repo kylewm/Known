@@ -26,7 +26,7 @@
                         );
                     }
                 }
-                header('Content-type: text/json');
+                $this->setResponseHeader('Content-type: text/json');
                 echo json_encode($results);
 
             }

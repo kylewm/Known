@@ -22,7 +22,7 @@
                         $this->lastModifiedGatekeeper($modifiedts); // Set 304 and exit if we've not modified this object
                     }
                 }
-                
+
                 if (!empty($this->arguments[0])) {
                     $object = \Idno\Entities\File::getByID($this->arguments[0]);
                 }
@@ -32,7 +32,7 @@
 
                 session_write_close();  // Close the session early
 
-                //header("Pragma: public");
+                //$this->setResponseHeader("Pragma: public");
 
                 // Determine uploaded timestamp
                 if ($object instanceof \MongoGridFSFile) {
@@ -45,20 +45,20 @@
                     $upload_ts = time();
                 }
 
-                header("Pragma: public");
-                header("Cache-Control: public");
-                header('Expires: ' . date(\DateTime::RFC1123, time() + (86400 * 30))); // Cache files for 30 days!
+                $this->setResponseHeader("Pragma: public");
+                $this->setResponseHeader("Cache-Control: public");
+                $this->setResponseHeader('Expires: ' . date(\DateTime::RFC1123, time() + (86400 * 30))); // Cache files for 30 days!
                 $this->setLastModifiedHeader($upload_ts);
                 if ($cache = \Idno\Core\Idno::site()->cache()) {
                     $cache->store("{$this->arguments[0]}_modified_ts", $upload_ts);
                 }
                 if (!empty($object->file['mime_type'])) {
-                    header('Content-type: ' . $object->file['mime_type']);
+                    $this->setResponseHeader('Content-type: ' . $object->file['mime_type']);
                 } else {
-                    header('Content-type: application/data');
+                    $this->setResponseHeader('Content-type: application/data');
                 }
-                //header('Accept-Ranges: bytes');
-                //header('Content-Length: ' . filesize($object->getSize()));
+                //$this->setResponseHeader('Accept-Ranges: bytes');
+                //$this->setResponseHeader('Content-Length: ' . filesize($object->getSize()));
 
                 if (is_callable(array($object, 'passThroughBytes'))) {
                     $object->passThroughBytes();

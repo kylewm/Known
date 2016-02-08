@@ -22,7 +22,7 @@
                 if (empty($object)) {
                     $this->goneContent();
                 }
-                header("HTTP/1.1 301 Moved Permanently");
+                $this->setResponse(301);
                 $this->forward($object->getDisplayURL());
             }
 

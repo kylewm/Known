@@ -2,8 +2,10 @@
 
     $messages = $vars['messages'];
 
-    header('Content-type: text/html');
-    header("Access-Control-Allow-Origin: *");
+    // Get instance of current page for use further down the page
+    $currentPage = \Idno\Core\Idno::site()->currentPage();
+    $currentPage->setResponseHeader('Content-type: text/html');
+    $currentPage->setResponseHeader("Access-Control-Allow-Origin: *");
 
     if (empty($vars['title']) && !empty($vars['description'])) {
         $vars['title'] = implode(' ', array_slice(explode(' ', strip_tags($vars['description'])), 0, 10));
@@ -15,8 +17,6 @@
         $lang = \Idno\Core\Idno::site()->config()->lang;
     }
 
-    // Get instance of current page for use further down the page
-    $currentPage = \Idno\Core\Idno::site()->currentPage();
     if (!empty($vars['object'])) {
         $objectIcon = $vars['object']->getIcon();
     } else {
@@ -162,8 +162,9 @@
     <meta name="DC.title" content="<?= htmlspecialchars($vars['title']) ?>">
     <meta name="DC.description" content="<?= htmlspecialchars($description) ?>"><?php
 
-        if ($currentPage->isPermalink()) {
+        if ($currentPage->isPermalink() && !empty($vars['object'])) {
             /* @var \Idno\Common\Entity $object */
+            $object = $vars['object'];
             if ($object instanceof \Idno\Common\Entity) {
 
                 if ($creator = $object->getOwner()) {
@@ -446,12 +447,12 @@
      */
     $(document).ready(function(){
         var url = $('#soft-forward').attr('href');
-        
+
         if (!!url) {
             window.location = url;
         }
     });
-    
+
     /**
      * Handle Twitter tweet embedding
      */

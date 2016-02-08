@@ -34,6 +34,9 @@
             // changed with setResponse
             public $response = 200;
 
+            // Stores the response headers we'll be sending back.
+            public $responseHeaders = array();
+
             // Stores arguments given to page handlers, for parsing of regular
             // expression matches
             public $arguments = array();
@@ -53,10 +56,9 @@
 
             function init()
             {
-                if (!defined('KNOWN_UNIT_TEST')) { // Don't do header stuff in unit tests
-                    header('X-Powered-By: https://withknown.com');
-                    header('X-Clacks-Overhead: GNU Terry Pratchett');
-                }
+                $this->setResponseHeader('X-Powered-By: https://withknown.com');
+                $this->setResponseHeader('X-Clacks-Overhead: GNU Terry Pratchett');
+
                 if ($template = $this->getInput('_t')) {
                     if (\Idno\Core\Idno::site()->template()->templateTypeExists($template)) {
                         \Idno\Core\Idno::site()->template()->setTemplateType($template);
@@ -86,7 +88,7 @@
                 $arguments = func_get_args();
                 if (!empty($arguments)) $this->arguments = $arguments;
 
-                \Idno\Core\Idno::site()->triggerEvent('page/head', array('page_class' => get_called_class(), 'arguments' => $arguments));
+                \Idno\Core\Idno::site()->triggerEvent('page/head', array('page' => $this));
 
                 // Triggering GET content to call all the appropriate headers (web server should truncate the head request from body).
                 // This is the only way we can generate accurate expires and content length etc, but could be done more efficiently
@@ -386,7 +388,7 @@
             /**
              * To be extended by developers
              */
-            function getContent()
+            function getConent()
             {
                 $this->setResponse(501);
             }
@@ -436,7 +438,7 @@
             function goneContent()
             {
                 $this->setResponse(410);
-                http_response_code($this->response);
+                http_response_code($this->response); // FIXME redundant?
                 $t = \Idno\Core\Idno::site()->template();
                 $t->__(array('body' => $t->draw('pages/410'), 'title' => 'Gone, baby, gone'))->drawPage();
                 exit;
@@ -510,7 +512,7 @@
                             'location' => $location
                         ]);
                     } elseif (!\Idno\Core\Idno::site()->session()->isAPIRequest() || $this->response == 200) {
-                        header('Location: ' . $location);
+                        $this->setResponseHeader('Location: ' . $location);
                     }
 
                     if ($exit) {
@@ -524,8 +526,8 @@
              */
             function flushBrowser()
             {
-                header('Connection: close');
-                header('Content-length: ' . (string)ob_get_length());
+                $this->setResponseHeader('Connection: close');
+                $this->setResponseHeader('Content-length: ' . (string)ob_get_length());
 
                 @ob_end_flush();            // Return output to the browser
                 @ob_end_clean();
@@ -648,6 +650,19 @@
             }
 
             /**
+             * Set a response header
+             *
+             * @param string $header
+             */
+            function setResponseHeader($header)
+            {
+                $this->responseHeaders[] = $header;
+                if (!defined('KNOWN_UNIT_TEST')) { // Don't do header stuff in unit tests
+                    header($header);
+                }
+            }
+
+            /**
              * Set the response code for the page. Note: this will be overridden
              * if the main system response code is already not 200
              *
@@ -737,8 +752,8 @@
 
                     $url = str_replace('http://', 'https://', $this->currentUrl());
 
-                    header("HTTP/1.1 307 Temporary Redirect");
-                    header("Location: $url");
+                    $this->setResponseHeader("HTTP/1.1 307 Temporary Redirect");
+                    $this->setResponseHeader("Location: $url");
 
                     exit;
                 }
@@ -935,7 +950,7 @@
              */
             public function setLastModifiedHeader($timestamp)
             {
-                header('Last-Modified: ' . \Idno\Core\Time::timestampToRFC2616($timestamp));
+                $this->setResponseHeader('Last-Modified: ' . \Idno\Core\Time::timestampToRFC2616($timestamp));
             }
 
             /**
@@ -948,7 +963,7 @@
                 $headers = $this->getallheaders();
                 if (isset($headers['If-Modified-Since'])) {
                     if (strtotime($headers['If-Modified-Since']) <= $timestamp) {
-                        //header('HTTP/1.1 304 Not Modified');
+                        //$this->setResponseHeader('HTTP/1.1 304 Not Modified');
                         //exit;
                     }
                 }
