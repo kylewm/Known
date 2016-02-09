@@ -1,8 +1,12 @@
+<?php
+
 /**
  * Router based heavily on ToroPHP (https://github.com/anandkunal/ToroPHP)
  */
 
 namespace Idno\Core {
+
+    use Idno\Common\Response;
 
     class Router {
 
@@ -12,27 +16,44 @@ namespace Idno\Core {
         }
 
         /**
-         * @param \Idno\Common\Request $request
          * @return \Idno\Common\Response
          */
-        function serve($request)
+        function serve()
         {
-            $path_info = $request->getPathInfo();
+            $request_method = strtolower($_SERVER['REQUEST_METHOD']);
+            $path_info = '/';
+            if (!empty($_SERVER['PATH_INFO'])) {
+                $path_info = $_SERVER['PATH_INFO'];
+            }
+            else if (!empty($_SERVER['ORIG_PATH_INFO']) && $_SERVER['ORIG_PATH_INFO'] !== '/index.php') {
+                $path_info = $_SERVER['ORIG_PATH_INFO'];
+            }
+            //else {
+            if (!empty($_SERVER['REQUEST_URI'])) {
+                $path_info = (strpos($_SERVER['REQUEST_URI'], '?') > 0) ? strstr($_SERVER['REQUEST_URI'], '?', true) : $_SERVER['REQUEST_URI'];
+            }
+            //}
+
+            $is_xhr = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+
+
             $discovered_handler = null;
             $regex_matches = array();
 
-            if (isset($routes[$path_info])) {
-                $discovered_handler = $routes[$path_info];
+            if (isset($this->routes[$path_info])) {
+                $discovered_handler = $this->routes[$path_info];
             }
-            else if ($routes) {
+            else if ($this->routes) {
                 $tokens = array(
                     ':string' => '([a-zA-Z]+)',
                     ':number' => '([0-9]+)',
                     ':alpha'  => '([a-zA-Z0-9-_]+)'
                 );
-                foreach ($routes as $pattern => $handler_name) {
+                error_log("using $path_info");
+                foreach ($this->routes as $pattern => $handler_name) {
                     $pattern = strtr($pattern, $tokens);
                     if (preg_match('#^/?' . $pattern . '/?$#', $path_info, $matches)) {
+                        error_log("found match $handler_name");
                         $discovered_handler = $handler_name;
                         $regex_matches = $matches;
                         break;
@@ -55,44 +76,62 @@ namespace Idno\Core {
             if ($handler_instance) {
                 unset($regex_matches[0]);
 
-                if ($request->isXHR() && method_exists($handler_instance, $request_method . '_xhr')) {
-                    header('Content-type: application/json');
-                    header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-                    header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-                    header('Cache-Control: no-store, no-cache, must-revalidate');
-                    header('Cache-Control: post-check=0, pre-check=0', false);
-                    header('Pragma: no-cache');
+                $response = $handler_instance->response;
+                if ($is_xhr && method_exists($handler_instance, $request_method . '_xhr')) {
+                    $response->header('Content-type: application/json');
+                    $response->header('Expires', 'Mon, 26 Jul 1997 05:00:00 GMT');
+                    $response->header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+                    $response->header('Cache-Control: no-store, no-cache, must-revalidate');
+                    $response->header('Cache-Control: post-check=0, pre-check=0', false);
+                    $response->header('Pragma: no-cache');
                     $request_method .= '_xhr';
                 }
 
                 if (method_exists($handler_instance, $request_method)) {
-                    return $this->serveRoute($request, $handler_instance, $request_method, $regex_matches);
+                    return $this->serveRoute($handler_instance, $request_method, $regex_matches);
                 }
                 else {
-                    return new Response('', 405);
+                    $response = new Response();
+                    $response->status = 405;
+                    $t = \Idno\Core\Idno::site()->template();
+                    $t->autodetectTemplateType();
+                    $response->content = $t->__(array(
+                        'body' => $t->draw('pages/405'),
+                        'title' => 'Method not allowed!')
+                    )->drawPage(false);
+                    return $response;
                 }
             }
             else {
-                return new Response('', 404);
+                $response = new Response();
+                $response->status = 404;
+                $t = \Idno\Core\Idno::site()->template();
+                $t->autodetectTemplateType();
+                $response->content = $t->__(array(
+                    'body' => $t->draw('pages/404'),
+                    'title' => 'Not found!')
+                )->drawPage(false);
+                return $response;
             }
         }
 
-        private function serveRoute($request, $handler_instance, $request_method, $regex_matches)
+        private function serveRoute($handler_instance, $request_method, $regex_matches)
         {
-            $handler_instance->request = $request;
-
-            ob_start()
-            call_user_func_array(array($handler_instance, $request_method), $regex_matches);
-            $content = ob_get_clean();
-
-            $response = $handler_instance->response;
-            if ($content && $response->getContent()) {
-                $content .= $response->getContent()
+            ob_start();
+            try {
+                call_user_func_array(array($handler_instance, $request_method), $regex_matches);
+            } catch (ExitException $e) {
+                // exit without killing the process
             }
-            $response->setContent($content);
+            $response = $handler_instance->response;
 
+            // capture content from stdout if it is not set in the response explicitly
+            if (!$response->stream && !$response->content) {
+                $response->content = ob_get_clean();
+            } else {
+                ob_end_flush();
+            }
 
-            $response->prepare($request);
             return $response;
         }
 

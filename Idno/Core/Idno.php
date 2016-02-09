@@ -814,11 +814,10 @@
                 return self::$site;
             }
 
-            function run()
+            function run($routes)
             {
-                $router = new Router($this->pagehandlers);
-                $request = \Idno\Common\Request::createFromGlobals();
-                $response = $router->serve($request);
+                $router = new Router($routes);
+                $response = $router->serve();
                 $response->send();
             }
 

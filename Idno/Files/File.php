@@ -57,6 +57,11 @@
              */
             abstract function getFilename();
 
+            /**
+             * Return this file's stream URL (scheme://target)
+             */
+            abstract function getStream();
+
             /* Delete this file
              * @return bool
              */

@@ -32,7 +32,7 @@
 
                 session_write_close();  // Close the session early
 
-                //$this->setResponseHeader("Pragma: public");
+                //$this->response->header("Pragma: public");
 
                 // Determine uploaded timestamp
                 if ($object instanceof \MongoGridFSFile) {
@@ -45,22 +45,24 @@
                     $upload_ts = time();
                 }
 
-                $this->setResponseHeader("Pragma: public");
-                $this->setResponseHeader("Cache-Control: public");
-                $this->setResponseHeader('Expires: ' . date(\DateTime::RFC1123, time() + (86400 * 30))); // Cache files for 30 days!
+                $this->response->header("Pragma: public");
+                $this->response->header("Cache-Control: public");
+                $this->response->header('Expires: ' . date(\DateTime::RFC1123, time() + (86400 * 30))); // Cache files for 30 days!
                 $this->setLastModifiedHeader($upload_ts);
                 if ($cache = \Idno\Core\Idno::site()->cache()) {
                     $cache->store("{$this->arguments[0]}_modified_ts", $upload_ts);
                 }
                 if (!empty($object->file['mime_type'])) {
-                    $this->setResponseHeader('Content-type: ' . $object->file['mime_type']);
+                    $this->response->header('Content-type: ' . $object->file['mime_type']);
                 } else {
-                    $this->setResponseHeader('Content-type: application/data');
+                    $this->response->header('Content-type: application/data');
                 }
-                //$this->setResponseHeader('Accept-Ranges: bytes');
-                //$this->setResponseHeader('Content-Length: ' . filesize($object->getSize()));
+                //$this->response->header('Accept-Ranges: bytes');
+                //$this->response->header('Content-Length: ' . filesize($object->getSize()));
 
-                if (is_callable(array($object, 'passThroughBytes'))) {
+                if ($stream = $object->getStream()) {
+                    $this->response->stream = $stream;
+                } else if (is_callable(array($object, 'passThroughBytes'))) {
                     $object->passThroughBytes();
                 } else {
                     if ($stream = $object->getResource()) {

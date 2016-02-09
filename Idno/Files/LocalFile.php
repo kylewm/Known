@@ -49,6 +49,14 @@
                 return false;
             }
 
+            function getStream()
+            {
+                if (file_exists($this->internal_filename)) {
+                    return 'file://' . $this->internal_filename;
+                }
+                return false;
+            }
+
             /**
              * Delete this file
              */

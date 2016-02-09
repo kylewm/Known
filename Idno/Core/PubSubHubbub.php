@@ -42,8 +42,8 @@
                     if (!empty(site()->config()->hub)) {
                         $eventdata = $event->data();
                         $page      = $eventdata['page'];
-                        $page->setResponseHeader('Link: <' . site()->config()->hub . '>; rel="hub"', false);
-                        $page->setResponseHeader('Link: <' . site()->template()->getCurrentURL() . '>; rel="self"', false);
+                        $page->response->header('Link: <' . site()->config()->hub . '>; rel="hub"', false);
+                        $page->response->header('Link: <' . site()->template()->getCurrentURL() . '>; rel="self"', false);
                     }
 
                 });

@@ -15,8 +15,8 @@
 
                 set_time_limit(0);
 
-                $this->setResponseHeader('Content-type: text/rss');
-                $this->setResponseHeader('Content-disposition: attachment; filename=user_export.rss');
+                $this->response->header('Content-type: text/rss');
+                $this->response->header('Content-disposition: attachment; filename=user_export.rss');
 
                 $hide_private = true;
                 if ($private = $this->getInput('allposts')) {

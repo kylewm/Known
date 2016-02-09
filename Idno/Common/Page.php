@@ -30,9 +30,6 @@
             // variable
             public $data = array();
 
-            // @var \Idno\Common\Request
-            public $request;
-
             // @var \Idno\Common\Response
             public $response;
 
@@ -56,8 +53,8 @@
             function init()
             {
                 $this->response = new Response();
-                $this->setResponseHeader('X-Powered-By: https://withknown.com');
-                $this->setResponseHeader('X-Clacks-Overhead: GNU Terry Pratchett');
+                $this->response->header('X-Powered-By: https://withknown.com');
+                $this->response->header('X-Clacks-Overhead: GNU Terry Pratchett');
 
                 if ($template = $this->getInput('_t')) {
                     if (\Idno\Core\Idno::site()->template()->templateTypeExists($template)) {
@@ -95,7 +92,7 @@
                 $this->getContent();
 
                 //if (http_response_code() != 200)
-                http_response_code($this->response);
+                http_response_code($this->response->status);
             }
 
             /**
@@ -119,10 +116,6 @@
                 \Idno\Core\Idno::site()->triggerEvent('page/get', array('page_class' => get_called_class(), 'arguments' => $arguments));
 
                 $this->getContent();
-
-                if (http_response_code() != 200) {
-                    http_response_code($this->response);
-                }
             }
 
             /**
@@ -181,10 +174,6 @@
                 } else {
                     $this->forward(); // If we haven't forwarded yet, do so (if we can)
                 }
-
-                //if (http_response_code() != 200) {
-                http_response_code($this->response);
-                //}
             }
 
             /**
@@ -241,9 +230,6 @@
                 } else {
                     $this->forward(); // If we haven't forwarded yet, do so (if we can)
                 }
-
-                if (http_response_code() != 200)
-                    http_response_code($this->response);
             }
 
             /**
@@ -300,9 +286,6 @@
                 } else {
                     $this->forward(); // If we haven't forwarded yet, do so (if we can)
                 }
-
-                if (http_response_code() != 200)
-                    http_response_code($this->response);
             }
 
             /**
@@ -438,10 +421,9 @@
             function goneContent()
             {
                 $this->setResponse(410);
-                http_response_code($this->response); // FIXME redundant?
                 $t = \Idno\Core\Idno::site()->template();
                 $t->__(array('body' => $t->draw('pages/410'), 'title' => 'Gone, baby, gone'))->drawPage();
-                exit;
+                throw new ExitException();
             }
 
             /**
@@ -450,10 +432,9 @@
             function noContent()
             {
                 $this->setResponse(404);
-                http_response_code($this->response);
                 $t = \Idno\Core\Idno::site()->template();
                 $t->__(array('body' => $t->draw('pages/404'), 'title' => 'Not found!'))->drawPage();
-                exit;
+                throw new ExitException();
             }
 
             /**
@@ -462,20 +443,20 @@
             function deniedContent()
             {
                 $this->setResponse(403);
-                http_response_code($this->response);
+                http_response_code($this->response->status);
                 $t = \Idno\Core\Idno::site()->template();
                 $t->__(array('body' => $t->draw('pages/403'), 'title' => 'Denied!'))->drawPage();
-                exit;
+                throw new ExitException();
             }
 
 
             function exception(\Exception $e)
             {
                 $this->setResponse(500);
-                http_response_code($this->response);
+                http_response_code($this->response->status);
                 $t = \Idno\Core\Idno::site()->template();
                 $t->__(array('body' => $t->__(array('exception' => $e))->draw('pages/500'), 'title' => 'Exception'))->drawPage();
-                exit;
+                throw new ExitException();
             }
 
             /**
@@ -511,12 +492,12 @@
                         echo json_encode([
                             'location' => $location
                         ]);
-                    } elseif (!\Idno\Core\Idno::site()->session()->isAPIRequest() || $this->response == 200) {
-                        $this->setResponseHeader('Location: ' . $location);
+                    } elseif (!\Idno\Core\Idno::site()->session()->isAPIRequest() || $this->response->status == 200) {
+                        $this->response->header('Location: ' . $location);
                     }
 
                     if ($exit) {
-                        exit;
+                        throw new \Idno\Common\ExitException();
                     }
                 }
             }
@@ -526,8 +507,8 @@
              */
             function flushBrowser()
             {
-                $this->setResponseHeader('Connection: close');
-                $this->setResponseHeader('Content-length: ' . (string)ob_get_length());
+                $this->response->header('Connection: close');
+                $this->response->header('Content-length: ' . (string)ob_get_length());
 
                 @ob_end_flush();            // Return output to the browser
                 @ob_end_clean();
@@ -650,19 +631,6 @@
             }
 
             /**
-             * Set a response header
-             *
-             * @param string $header
-             */
-            function setResponseHeader($header)
-            {
-                $this->responseHeaders[] = $header;
-                if (!defined('KNOWN_UNIT_TEST')) { // Don't do header stuff in unit tests
-                    header($header);
-                }
-            }
-
-            /**
              * Set the response code for the page. Note: this will be overridden
              * if the main system response code is already not 200
              *
@@ -670,9 +638,8 @@
              */
             function setResponse($code)
             {
-                $code           = (int)$code;
-                $this->response = $code;
-                http_response_code($this->response);
+                $code                   = (int)$code;
+                $this->response->status = $code;
             }
 
             /**
@@ -752,8 +719,8 @@
 
                     $url = str_replace('http://', 'https://', $this->currentUrl());
 
-                    $this->setResponseHeader("HTTP/1.1 307 Temporary Redirect");
-                    $this->setResponseHeader("Location: $url");
+                    $this->response->header("HTTP/1.1 307 Temporary Redirect");
+                    $this->response->header("Location: $url");
 
                     exit;
                 }
@@ -950,7 +917,7 @@
              */
             public function setLastModifiedHeader($timestamp)
             {
-                $this->setResponseHeader('Last-Modified: ' . \Idno\Core\Time::timestampToRFC2616($timestamp));
+                $this->response->header('Last-Modified: ' . \Idno\Core\Time::timestampToRFC2616($timestamp));
             }
 
             /**
@@ -963,7 +930,7 @@
                 $headers = $this->getallheaders();
                 if (isset($headers['If-Modified-Since'])) {
                     if (strtotime($headers['If-Modified-Since']) <= $timestamp) {
-                        //$this->setResponseHeader('HTTP/1.1 304 Not Modified');
+                        //$this->response->header('HTTP/1.1 304 Not Modified');
                         //exit;
                     }
                 }

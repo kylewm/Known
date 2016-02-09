@@ -4,8 +4,8 @@
 
     // Get instance of current page for use further down the page
     $currentPage = \Idno\Core\Idno::site()->currentPage();
-    $currentPage->setResponseHeader('Content-type: text/html');
-    $currentPage->setResponseHeader("Access-Control-Allow-Origin: *");
+    $currentPage->response->header('Content-type: text/html');
+    $currentPage->response->header("Access-Control-Allow-Origin: *");
 
     if (empty($vars['title']) && !empty($vars['description'])) {
         $vars['title'] = implode(' ', array_slice(explode(' ', strip_tags($vars['description'])), 0, 10));

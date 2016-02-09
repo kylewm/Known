@@ -248,8 +248,8 @@
                     if (!empty(site()->config()->hub)) {
                         $eventdata = $event->data();
                         $page      = $eventdata['page'];
-                        $page->setResponseHeader('Link: <' . \Idno\Core\Idno::site()->config()->getURL() . 'webmention/>; rel="http://webmention.org/"', false);
-                        $page->setResponseHeader('Link: <' . \Idno\Core\Idno::site()->config()->getURL() . 'webmention/>; rel="webmention"', false);
+                        $page->response->header('Link: <' . \Idno\Core\Idno::site()->config()->getURL() . 'webmention/>; rel="http://webmention.org/"', false);
+                        $page->response->header('Link: <' . \Idno\Core\Idno::site()->config()->getURL() . 'webmention/>; rel="webmention"', false);
                     }
 
                 });

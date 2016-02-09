@@ -1,7 +1,7 @@
 <?php
 
     $currentPage = \Idno\Core\Idno::site()->currentPage();
-    $currentPage->setResponseHeader("Content-type: application/json");
+    $currentPage->response->header("Content-type: application/json");
 
 ?>
 {

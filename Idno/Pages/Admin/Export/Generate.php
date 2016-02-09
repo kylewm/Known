@@ -31,8 +31,8 @@
 
                 session_write_close();
 
-                $this->setResponseHeader('Connection: close');
-                $this->setResponseHeader('Content-length: ' . (string)ob_get_length());
+                $this->response->header('Connection: close');
+                $this->response->header('Content-length: ' . (string)ob_get_length());
 
                 @ob_end_flush();            // Return output to the browser
                 @ob_end_clean();
@@ -55,7 +55,7 @@
                 if ($path = Migration::createCompressedArchive()) {
 
                     $filename = \Idno\Core\Idno::site()->config()->host . '.zip';
-                    /*                    $this->setResponseHeader('Content-disposition: attachment;filename=' . $filename);
+                    /*                    $this->response->header('Content-disposition: attachment;filename=' . $filename);
                                         if ($fp = fopen($path, 'r')) {
                                             while ($content = fread($fp, 4096)) {
                                                 echo $content;

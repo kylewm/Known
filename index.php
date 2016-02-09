@@ -40,17 +40,5 @@
         }
     }
 
-// Manage routing
-
-    \Idno\Core\PageHandler::hook('404', function ($params = array()) {
-        http_response_code(404);
-        $t = \Idno\Core\Idno::site()->template();
-
-        // Take over page detection
-        \Idno\Core\Idno::site()->template()->autodetectTemplateType();
-
-        $t->__(array('body' => $t->draw('pages/404'), 'title' => 'Not found!'))->drawPage();
-        exit;
-    });
-
-    \Idno\Core\Idno::site()->run();
+// Route the request
+    \Idno\Core\Idno::site()->run($routes);

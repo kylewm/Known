@@ -1,10 +1,10 @@
 <?php
 
     $currentPage = \Idno\Core\Idno::site()->currentPage();
-    $currentPage->setResponseHeader('Content-type: text/html');
-    $currentPage->setResponseHeader('Link: <' . \Idno\Core\Idno::site()->config()->getDisplayURL() . 'webmention/>; rel="http://webmention.org/"');
-    $currentPage->setResponseHeader('Link: <' . \Idno\Core\Idno::site()->config()->getDisplayURL() . 'webmention/>; rel="webmention"');
-    $currentPage->setResponseHeader("Access-Control-Allow-Origin: *");
+    $currentPage->response->header('Content-type: text/html');
+    $currentPage->response->header('Link: <' . \Idno\Core\Idno::site()->config()->getDisplayURL() . 'webmention/>; rel="http://webmention.org/"');
+    $currentPage->response->header('Link: <' . \Idno\Core\Idno::site()->config()->getDisplayURL() . 'webmention/>; rel="webmention"');
+    $currentPage->response->header("Access-Control-Allow-Origin: *");
 
     if (empty($vars['title']) && !empty($vars['description'])) {
         $vars['title'] = implode(' ', array_slice(explode(' ', strip_tags($vars['description'])), 0, 10));
