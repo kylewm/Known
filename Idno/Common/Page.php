@@ -371,7 +371,7 @@
             /**
              * To be extended by developers
              */
-            function getConent()
+            function getContent()
             {
                 $this->setResponse(501);
             }
