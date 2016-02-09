@@ -49,6 +49,7 @@
                         if ($subscription->save()) {
                             \Idno\Core\Idno::site()->session()->addMessage("You're following " . $feed->getTitle() . '!');
                             $this->forward(\Idno\Core\Idno::site()->config()->getURL() . 'following/');
+                            return;
                         }
                     }
                     $this->forward(\Idno\Core\Idno::site()->config()->getURL() . 'following/confirm/?feed=' . urlencode($feed->url));

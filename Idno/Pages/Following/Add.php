@@ -22,8 +22,9 @@
                     } else {
                         \Idno\Core\Idno::site()->session()->addErrorMessage("We couldn't find a feed at that site.");
                     }
+                } else {
+                    $this->forward(\Idno\Core\Idno::site()->config()->getURL() . 'following/');
                 }
-                $this->forward(\Idno\Core\Idno::site()->config()->getURL() . 'following/');
 
             }
 

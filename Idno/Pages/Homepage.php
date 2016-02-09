@@ -25,6 +25,7 @@
                 // Check for an empty site
                 if (!\Idno\Entities\User::get()) {
                     $this->forward(\Idno\Core\Idno::site()->config()->getURL() . 'begin/');
+                    return;
                 }
 
                 if (!empty($this->arguments[0])) { // If we're on the friendly content-specific URL

@@ -19,7 +19,10 @@
                 if (!empty($this->arguments[0])) {
                     $object = \Idno\Common\Entity::getByID($this->arguments[0]);
                 }
-                if (empty($object)) $this->forward(); // TODO: 404
+                if (empty($object)) {
+                    $this->forward(); // TODO: 404
+                    return;
+                }
 
                 $t = \Idno\Core\Idno::site()->template();
                 $t->__(array(
@@ -37,7 +40,10 @@
                 if (!empty($this->arguments[0])) {
                     $object = \Idno\Common\Entity::getByID($this->arguments[0]);
                 }
-                if (empty($object)) $this->forward(); // TODO: 404
+                if (empty($object)) {
+                    $this->forward(); // TODO: 404
+                    return;
+                }
                 if ($object->delete()) {
                     \Idno\Core\Idno::site()->session()->addMessage($object->getTitle() . ' was deleted.');
                 }

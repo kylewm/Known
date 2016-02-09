@@ -43,6 +43,7 @@
                 // Just forward to the user's page
                 if ($object instanceof \Idno\Entities\User) {
                     $this->forward($object->getDisplayURL());
+                    return;
                 }
 
                 $this->setOwner($object->getOwner());
@@ -107,11 +108,15 @@
                         $object = \Idno\Common\Entity::getBySlug($this->arguments[0]);
                     }
                 }
-                if (empty($object)) $this->forward(); // TODO: 404
+                if (empty($object)) {
+                    $this->forward(); // TODO: 404
+                    return;
+                }
                 if ($object->saveDataFromInput($this)) {
                     $this->forward($object->getDisplayURL());
+                } else {
+                    $this->forward($_SERVER['HTTP_REFERER']);
                 }
-                $this->forward($_SERVER['HTTP_REFERER']);
             }
 
             // Handle DELETE requests to the entity
@@ -124,7 +129,10 @@
                         $object = \Idno\Common\Entity::getBySlug($this->arguments[0]);
                     }
                 }
-                if (empty($object)) $this->forward(); // TODO: 404
+                if (empty($object)) {
+                    $this->forward(); // TODO: 404
+                    return;
+                }
                 if ($object->delete()) {
                     \Idno\Core\Idno::site()->session()->addMessage($object->getTitle() . ' was deleted.');
                 }

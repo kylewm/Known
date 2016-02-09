@@ -138,6 +138,9 @@
                 if (\Idno\Core\Idno::site()->session()->isAPIRequest() || \Idno\Core\Idno::site()->actions()->validateToken('', false)) {
                     $this->parseJSONPayload();
                     $return = $this->postContent();
+                    if ($this->response->hasHeader('Location')) {
+                        return;
+                    }
                 } else {
                     throw new \Exception('Invalid token.');
                 }
@@ -497,7 +500,7 @@
                     }
 
                     if ($exit) {
-                        throw new \Idno\Common\ExitException();
+                        //exit;
                     }
                 }
             }

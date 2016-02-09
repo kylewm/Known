@@ -55,6 +55,8 @@
                             $object->save();
                         }
                     }
+
+                    error_log("forwarding to " . $object->getDisplayURL());
                     $this->forward($object->getDisplayURL() . '#comments');
                 }
 

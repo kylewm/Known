@@ -58,19 +58,25 @@
                 if (!empty($this->arguments[0])) {
                     $user = \Idno\Entities\User::getByHandle($this->arguments[0]);
                 }
-                if (empty($user)) $this->forward(); // TODO: 404
+                if (empty($user)) {
+                    $this->forward(); // TODO: 404
+                    return;
+                }
                 if ($user->saveDataFromInput($this)) {
                     if ($onboarding = $this->getInput('onboarding')) {
                         $services = \Idno\Core\Idno::site()->syndication()->getServices();
                         if (!empty($services) || !empty(\Idno\Core\Idno::site()->config->force_onboarding_connect)) {
                             $this->forward(\Idno\Core\Idno::site()->config()->getURL() . 'begin/connect');
+                            return;
                         } else {
                             $this->forward(\Idno\Core\Idno::site()->config()->getURL() . 'begin/publish');
+                            return;
                         }
                     }
                     $this->forward($user->getURL());
+                } else {
+                    $this->forward($_SERVER['HTTP_REFERER']);
                 }
-                $this->forward($_SERVER['HTTP_REFERER']);
             }
 
             // Handle DELETE requests to the entity
@@ -80,7 +86,10 @@
                 if (!empty($this->arguments[0])) {
                     $object = \Idno\Common\Entity::getByID($this->arguments[0]);
                 }
-                if (empty($object)) $this->forward(); // TODO: 404
+                if (empty($object)) {
+                    $this->forward(); // TODO: 404
+                    return;
+                }
                 if ($object->delete()) {
                     \Idno\Core\Idno::site()->session()->addMessage($object->getTitle() . ' was deleted.');
                 }

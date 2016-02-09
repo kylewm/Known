@@ -18,6 +18,7 @@
                 // If we're somehow here but logged in, move to the front page
                 if (\Idno\Core\Idno::site()->session()->isLoggedOn()) {
                     $this->forward();
+                    return;
                 }
 
                 $fwd = $this->getInput('fwd'); // Forward to a new page?
@@ -39,7 +40,7 @@
                 }
 
                 $this->referrerGatekeeper();
-                
+
                 if ($user = \Idno\Entities\User::getByHandle($this->getInput('email'))) {
                 } else if ($user = \Idno\Entities\User::getByEmail($this->getInput('email'))) {
                 } else {

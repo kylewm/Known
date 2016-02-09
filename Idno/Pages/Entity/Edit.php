@@ -19,8 +19,14 @@
                 if (!empty($this->arguments[0])) {
                     $object = \Idno\Common\Entity::getByID($this->arguments[0]);
                 }
-                if (empty($object)) $this->forward(); // TODO: 404
-                if (!$object->canEdit()) $this->forward($object->getDisplayURL());
+                if (empty($object)) {
+                    $this->forward(); // TODO: 404
+                    return;
+                }
+                if (!$object->canEdit()) {
+                    $this->forward($object->getDisplayURL());
+                    return;
+                }
 
                 if ($owner = $object->getOwner()) {
                     $this->setOwner($owner);

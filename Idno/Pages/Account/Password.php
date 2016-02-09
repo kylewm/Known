@@ -56,6 +56,7 @@
                         $email->send();
 
                         $this->forward(\Idno\Core\Idno::site()->config()->getURL() . 'account/password/?sent=true');
+                        return;
 
                     }
 

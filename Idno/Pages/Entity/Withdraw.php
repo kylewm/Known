@@ -16,11 +16,12 @@
                 if (!empty($this->arguments[0])) {
                     $object = \Idno\Common\Entity::getByID($this->arguments[0]);
                     $this->forward($object->getDisplayURL());
+                    return;
                 }
                 if (empty($object)) {
                     $this->setResponse(404);
                     echo \Idno\Core\Idno::site()->template()->__(array('body' => \Idno\Core\Idno::site()->template()->draw('404'), 'title' => 'Not found'))->drawPage();
-                    exit;
+                    return;
                 }
             }
 
@@ -34,13 +35,13 @@
                 if (empty($object)) {
                     $this->setResponse(404);
                     echo \Idno\Core\Idno::site()->template()->__(array('body' => \Idno\Core\Idno::site()->template()->draw('404'), 'title' => 'Not found'))->drawPage();
-                    exit;
+                    return;
                 }
 
                 if (!$object->canEdit()) {
                     $this->setResponse(403);
                     echo \Idno\Core\Idno::site()->template()->__(array('body' => \Idno\Core\Idno::site()->template()->draw('403'), 'title' => 'Permission denied'))->drawPage();
-                    exit;
+                    return;
                 }
 
                 $object->unsyndicate();

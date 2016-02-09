@@ -26,10 +26,12 @@
                     if (!\Idno\Core\Idno::site()->config()->canAddUsers()) {
                         \Idno\Core\Idno::site()->session()->addErrorMessage("This site is closed to new users.");
                         $this->forward(\Idno\Core\Idno::site()->config()->getURL());
+                        return;
                     }
                     if (!\Idno\Entities\Invitation::validate($email, $code)) {
                         \Idno\Core\Idno::site()->session()->addErrorMessage("Your invitation doesn't seem to be valid, or has expired.");
                         $this->forward(\Idno\Core\Idno::site()->config()->getURL());
+                        return;
                     }
                 }
 
@@ -59,9 +61,9 @@
                 $code       = $this->getInput('code');
                 $onboarding = $this->getInput('onboarding');
                 $set_name   = $this->getInput('set_name');
-                
+
                 $this->referrerGatekeeper();
-                
+
                 /*if (!\Idno\Common\Page::isSSL() && !\Idno\Core\Idno::site()->config()->disable_cleartext_warning) {
                     \Idno\Core\Idno::site()->session()->addErrorMessage("Warning: Access credentials were sent over a non-secured connection! To disable this warning set disable_cleartext_warning in your config.ini");
                 }*/
@@ -70,6 +72,7 @@
                     if (!($invitation = \Idno\Entities\Invitation::validate($email, $code))) {
                         \Idno\Core\Idno::site()->session()->addErrorMessage("Your invitation doesn't seem to be valid, or has expired.");
                         $this->forward(\Idno\Core\Idno::site()->config()->getURL());
+                        return;
                     } else {
                         // Removing this from here - invitation will be deleted once user is created
                         //$invitation->delete(); // Remove the invitation; it's no longer needed

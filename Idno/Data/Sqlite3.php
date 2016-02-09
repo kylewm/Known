@@ -43,6 +43,7 @@
 
                         if (!empty(\Idno\Core\Idno::site()->config()->forward_on_empty)) {
                             $this->forward(\Idno\Core\Idno::site()->config()->forward_on_empty);
+                            return;
                         } else {
 
                             http_response_code(500);
@@ -53,7 +54,7 @@
                             }
                             error_log($e->getMessage());
                             include \Idno\Core\Idno::site()->config()->path . '/statics/db.php';
-                            exit;
+                            return;
                         }
                     }
                 }

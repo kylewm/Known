@@ -19,7 +19,10 @@
                 if (!empty($this->arguments[0])) {
                     $user = \Idno\Entities\User::getByHandle($this->arguments[0]);
                 }
-                if (empty($user)) $this->forward(); // TODO: 404
+                if (empty($user)) {
+                    $this->forward(); // TODO: 404
+                    return;
+                }
                 if (!$user->canEdit()) {
                     $this->deniedContent();
                 }

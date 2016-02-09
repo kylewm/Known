@@ -36,7 +36,6 @@ namespace Idno\Core {
 
             $is_xhr = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
 
-
             $discovered_handler = null;
             $regex_matches = array();
 
@@ -49,11 +48,9 @@ namespace Idno\Core {
                     ':number' => '([0-9]+)',
                     ':alpha'  => '([a-zA-Z0-9-_]+)'
                 );
-                error_log("using $path_info");
                 foreach ($this->routes as $pattern => $handler_name) {
                     $pattern = strtr($pattern, $tokens);
                     if (preg_match('#^/?' . $pattern . '/?$#', $path_info, $matches)) {
-                        error_log("found match $handler_name");
                         $discovered_handler = $handler_name;
                         $regex_matches = $matches;
                         break;
@@ -118,11 +115,7 @@ namespace Idno\Core {
         private function serveRoute($handler_instance, $request_method, $regex_matches)
         {
             ob_start();
-            try {
-                call_user_func_array(array($handler_instance, $request_method), $regex_matches);
-            } catch (ExitException $e) {
-                // exit without killing the process
-            }
+            call_user_func_array(array($handler_instance, $request_method), $regex_matches);
             $response = $handler_instance->response;
 
             // capture content from stdout if it is not set in the response explicitly

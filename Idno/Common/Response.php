@@ -1,6 +1,6 @@
 <?php
 
-    namespace Idno\Common {
+namespace Idno\Common {
 
     class Response {
 
@@ -8,6 +8,11 @@
         public $headers = array();
         public $content = null;
         public $stream  = null;
+
+        private static function startsWith($str, $prefix)
+        {
+            return strtolower(substr($str, 0, strlen($prefix))) === strtolower($prefix);
+        }
 
         /**
          * Add a header
@@ -18,13 +23,22 @@
 
                 $key = substr($string, 0, $idx+1);
                 for ($i = count($this->headers)-1 ; $i >= 0 ; $i--) {
-                    if (substr($this->headers[$i], 0, strlen($key)) === $key) {
+                    if (self::startsWith($this->headers[$i], $key)) {
                         array_splice($this->headers, $i, 1);
                     }
                 }
             }
 
             $this->headers[] = $string;
+        }
+
+        function hasHeader($key)
+        {
+            foreach ($this->headers as $header) {
+                if (self::startsWith($header, $key . ':')) {
+                    return true;
+                }
+            }
         }
 
         /**
@@ -39,6 +53,7 @@
                 http_response_code($this->status);
             }
             if ($this->stream) {
+                error_log("streaming bytes from " . $this->stream);
                 if ($hnd = fopen($this->stream, 'r')) {
                     fpassthru($hnd);
                     fclose($hnd);

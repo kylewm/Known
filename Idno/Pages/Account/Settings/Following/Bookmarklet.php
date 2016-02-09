@@ -170,6 +170,7 @@
                                     \Idno\Core\Idno::site()->session()->addMessage("You are now following " . $new_user->getTitle() . ', would you like to subscribe to their feed?');
 
                                     $this->forward(\Idno\Core\Idno::site()->config()->getURL() . 'following/confirm/?feed=' . urlencode($new_user->getURL()));
+                                    return;
                                 }
 
                                 \Idno\Core\Idno::site()->session()->addMessage("You are now following " . $new_user->getTitle());
