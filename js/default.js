@@ -21,6 +21,42 @@ function bindControls() {
     $('.ignore-this').hide();
 }
 
+function parseURL(url) {
+    var sp = url.split('?', 2);
+    var params = {};
+    if (sp.length > 1) {
+        sp[1].split('&').forEach(function (comp) {
+            var kv = comp.split('=', 2);
+            params[kv[0]] = decodeURIComponent(kv[1]);
+        });
+    }
+    return {
+        base: sp[0],
+        query: params,
+    }
+}
+
+function buildURL(base, query) {
+    var qs = '';
+    for (var key in query) {
+        if (qs.length > 0) { qs += '&'; }
+        qs += key + '=' + encodeURIComponent(query[key]);
+    }
+    return qs.length === 0 ? base : base + '?' + qs;
+}
+
+function addOrUpdateQueryParam(url, newKey, newValue) {
+    var parsed = parseURL(url);
+    parsed.query[newKey] = newValue;
+    return buildURL(parsed.base, parsed.query);
+}
+
+function removeQueryParam(url, key) {
+    var parsed = parseURL(url);
+    delete parsed.query[key];
+    return buildURL(parsed.base, parsed.query);
+}
+
 var isCreateFormVisible = false;
 
 function contentCreateForm(plugin) {
@@ -33,6 +69,8 @@ function contentCreateForm(plugin) {
     $.ajax(wwwroot() + plugin + '/edit/', {
         dataType: 'html',
         success: function (data) {
+            window.history.pushState(false, document.title, addOrUpdateQueryParam(window.location.href, 'show_editor', plugin));
+
             $('#contentCreate').html(data).slideDown(400);
             $('#contentTypeButtonBar').slideUp(400);
             window.contentCreateType = plugin;
@@ -51,6 +89,8 @@ function contentCreateForm(plugin) {
 function hideContentCreateForm() {
     isCreateFormVisible = false;
     if (window.contentPage == true) {
+        window.history.pushState(false, document.title, removeQueryParam(window.location.href, 'show_editor'));
+
         $('#contentTypeButtonBar').slideDown(200);
         $('#contentCreate').slideUp(200);
     } else {
