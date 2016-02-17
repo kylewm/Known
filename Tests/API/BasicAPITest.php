@@ -12,15 +12,15 @@ namespace Tests\API {
             $user = \Tests\KnownTestCase::user();
 
             $result = \Idno\Core\Webservice::get(\Idno\Core\Idno::site()->config()->url . '', [], [
-				    'Accept: application/json',
-				]);
+                'Accept: application/json',
+            ]);
 
             $content = json_decode($result['content']);
             $response = $result['response'];
 
-            $this->assertTrue(empty($result['error']));
-            $this->assertTrue(!empty($content));
-            $this->assertTrue($response == 200);
+            $this->assertEmpty($result['error']);
+            $this->assertNotEmpty($content);
+            $this->assertEquals(200, $response);
 
         }
 
@@ -32,20 +32,20 @@ namespace Tests\API {
                 'body' => "Making a nice test post via the api",
             ], [
 				    'Accept: application/json',
-                                    'X-KNOWN-USERNAME: ' . $user->handle,
+                    'X-KNOWN-USERNAME: ' . $user->handle,
 				    'X-KNOWN-SIGNATURE: ' . base64_encode(hash_hmac('sha256', '/status/edit', $user->getAPIkey(), true)),
-				]);
-            
+            ]);
+
             print_r($result);
             $content = json_decode($result['content']);
             $response = $result['response'];
-            
-            $this->assertTrue(empty($result['error']));
-            $this->assertTrue(!empty($content));
-            $this->assertTrue(!empty($content->location));
-            $this->assertTrue($response == 200);
-            
+
+            $this->assertEmpty($result['error']);
+            $this->assertNotEmpty($content);
+            $this->assertNotEmpty($content->location);
+            $this->assertEquals(200, $response);
+
         }
     }
-    
+
 }

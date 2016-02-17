@@ -17,14 +17,14 @@ namespace Tests {
         protected function &user() {
 
             // Have we already got a user?
-            if (static::$testUser)
+            if (static::$testUser) {
                 return static::$testUser;
+            }
 
             // Get a user (shouldn't happen)
             if ($user = \Idno\Entities\User::getByHandle('testuser'))
             {
                 static::$testUser = $user;
-
                 return $user;
             }
 
@@ -38,7 +38,6 @@ namespace Tests {
             $user->save();
 
             static::$testUser = $user;
-
             return $user;
         }
 
@@ -56,7 +55,6 @@ namespace Tests {
             if ($user = \Idno\Entities\User::getByHandle('testadmin'))
             {
                 static::$testAdmin = $user;
-
                 return $user;
             }
 
@@ -90,6 +88,11 @@ namespace Tests {
         {
             // Delete users, if we've created some but forgot to clean up
             if (static::$testUser) {
+                $entities = \Idno\Common\Entity::getFromAll(['owner' => static::$testUser->getUUID()]);
+                foreach ($entities as $entity) {
+                    $entity->delete();
+                }
+
                 static::$testUser->delete();
                 static::$testUser = false;
             }
