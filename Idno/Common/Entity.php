@@ -722,6 +722,8 @@
                     $search['verb'] = $verb;
                 }
 
+                error_log("tryin to get ActivityStreamsPost with " . var_export($search, true));
+
                 $other_results = \Idno\Entities\ActivityStreamPost::get($search);
 
                 $return = array_merge($results, $other_results);

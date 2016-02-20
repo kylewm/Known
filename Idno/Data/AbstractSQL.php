@@ -151,10 +151,18 @@
                         }
                     }
                     if (!empty($subtypes)) {
-                        $query_parameters['entity_subtype']['$in'] = $subtypes;
+                        if (count($subtypes) === 1) {
+                            $query_parameters['entity_subtype'] = $subtypes[0];
+                        } else {
+                            $query_parameters['entity_subtype']['$in'] = $subtypes;
+                        }
                     }
                     if (!empty($not)) {
-                        $query_parameters['entity_subtype']['$not'] = $not;
+                        if (count($not) === 1) {
+                            $query_parameters['entity_subtype']['$not'] = $not[0];
+                        } else {
+                            $query_parameters['entity_subtype']['$not']['$in'] = $not;
+                        }
                     }
                 }
 
@@ -218,10 +226,18 @@
                         }
                     }
                     if (!empty($subtypes)) {
-                        $query_parameters['entity_subtype']['$in'] = $subtypes;
+                        if (count($subtypes) === 1) {
+                            $query_parameters['entity_subtype'] = $subtypes[0];
+                        } else {
+                            $query_parameters['entity_subtype']['$in'] = $subtypes;
+                        }
                     }
                     if (!empty($not)) {
-                        $query_parameters['entity_subtype']['$not'] = $not;
+                        if (count($not) === 1) {
+                            $query_parameters['entity_subtype']['$not'] = $not[0];
+                        } else {
+                            $query_parameters['entity_subtype']['$not']['$in'] = $not;
+                        }
                     }
                 }
 
