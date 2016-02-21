@@ -436,7 +436,7 @@
                                 }
                                 $subwhere[] = $instring;
                             }
-                            if ($key == '$or')) {
+                            if ($key == '$or') {
                                 $subwhere[] = "(" . $this->build_where_from_array($value, $variables, $metadata_joins, $non_md_variables, 'or', $collection) . ")";
                             }
                             if ($key == '$search' && !empty($value)) {
