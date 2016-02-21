@@ -52,16 +52,14 @@ class Postgres94 extends AbstractSQL {
 
         $this->client->beginTransaction();
         try {
-            error_log("checking for existence of uuid=" . $array['uuid']);
-
             $exists = false;
-            $stmt = $this->client->prepare("select 1 from $collection where uuid=:uuid");
-            if ($stmt->execute(['uuid' => $array['uuid']])) {
+            $stmt = $this->client->prepare("select 1 from $collection where _id=:id");
+            if ($stmt->execute(['id' => $array['_id']])) {
                 $exists = $stmt->fetchColumn();
             }
 
             if ($exists) {
-                $stmt = $this->client->prepare("update $collection set _id=:id, jdoc=:jdoc where uuid=:uuid");
+                $stmt = $this->client->prepare("update $collection set uuid=:uuid, jdoc=:jdoc where _id=:id");
             } else {
                 $stmt = $this->client->prepare("insert into $collection (_id, uuid, jdoc) values (:id, :uuid, :jdoc)");
             }
@@ -96,11 +94,8 @@ class Postgres94 extends AbstractSQL {
         $collection = $this->sanitiseCollection($collection);
         $stmt = $this->client->prepare("select jdoc from $collection where uuid=:uuid");
 
-        error_log("getting record by uuid: $uuid");
         if ($stmt->execute(['uuid' => $uuid])) {
-            error_log("execute succeeded");
             if ($jdoc = $stmt->fetchColumn()) {
-                error_log("retrieved document: $jdoc");
                 return self::decode($jdoc);
             }
         }
@@ -119,7 +114,6 @@ class Postgres94 extends AbstractSQL {
         $collection = $this->sanitiseCollection($collection);
         $stmt = $this->client->prepare("select jdoc from $collection where _id=:id");
 
-        error_log("getting record by id: $id");
         if ($stmt->execute(['id' => $id])) {
             if ($jdoc = $stmt->fetchColumn()) {
                 return self::decode($jdoc);

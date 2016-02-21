@@ -176,8 +176,10 @@
                 if (empty($array['owner'])) {
                     $array['owner'] = '';
                 }
+
                 try {
                     $contents = json_encode($array);
+
                 } catch (\Exception $e) {
                     $contents = json_encode([]);
                     \Idno\Core\Idno::site()->logging()->error($e->getMessage());
@@ -459,33 +461,44 @@
                             }
                             if (!empty($value['$not'])) {
                                 if (!empty($value['$not']['$in'])) {
-                                    $value['$not'] = array_merge($value['$not'], $value['$not']['$in']);
-                                    unset($value['$not']['$in']);
-                                }
-                                if (in_array($key, array('uuid', '_id', 'entity_subtype', 'owner'))) {
-                                    $notstring = "`{$collection}`.`$key` not in(";
-                                    $i         = 0;
-                                    foreach ($value['$not'] as $val) {
-                                        if ($i > 0) $notstring .= ', ';
-                                        $notstring .= ":nonmdvalue{$non_md_variables}";
-                                        $variables[":nonmdvalue{$non_md_variables}"] = $val;
-                                        $non_md_variables++;
-                                        $i++;
+
+                                    if (in_array($key, array('uuid', '_id', 'entity_subtype', 'owner'))) {
+                                        $notstring = "`{$collection}`.`$key` not in (";
+                                        $i         = 0;
+                                        foreach ($value['$not']['$in'] as $val) {
+                                            if ($i > 0) $notstring .= ', ';
+                                            $notstring .= ":nonmdvalue{$non_md_variables}";
+                                            $variables[":nonmdvalue{$non_md_variables}"] = $val;
+                                            $non_md_variables++;
+                                            $i++;
+                                        }
+                                        $notstring .= ")";
+                                    } else {
+                                        $metadata_joins++;
+                                        $notstring                           = "(md{$metadata_joins}.`name` = :name{$metadata_joins} and md{$metadata_joins}.`collection` = '{$collection}' and md{$metadata_joins}.`value` not in (";
+                                        $variables[":name{$metadata_joins}"] = $key;
+                                        $i                                   = 0;
+                                        foreach ($value['$not']['$in'] as $val) {
+                                            if ($i > 0) $notstring .= ', ';
+                                            $notstring .= ":nonmdvalue{$non_md_variables}";
+                                            $variables[":nonmdvalue{$non_md_variables}"] = $val;
+                                            $non_md_variables++;
+                                            $i++;
+                                        }
+                                        $notstring .= "))";
                                     }
-                                    $notstring .= ")";
                                 } else {
-                                    $metadata_joins++;
-                                    $notstring                           = "(md{$metadata_joins}.`name` = :name{$metadata_joins} and md{$metadata_joins}.`collection` = '{$collection}' and md{$metadata_joins}.`value` not in (";
-                                    $variables[":name{$metadata_joins}"] = $key;
-                                    $i                                   = 0;
-                                    foreach ($value['$not'] as $val) {
-                                        if ($i > 0) $notstring .= ', ';
-                                        $notstring .= ":nonmdvalue{$non_md_variables}";
-                                        $variables[":nonmdvalue{$non_md_variables}"] = $val;
+                                    if (in_array($key, array('uuid', '_id', 'entity_subtype', 'owner'))) {
+                                        $notstring                                   = "`{$collection}`.`$key` != :nonmdvalue{$non_md_variables}";
+                                        $variables[":nonmdvalue{$non_md_variables}"] = $value['$not'];
                                         $non_md_variables++;
-                                        $i++;
+                                    } else {
+                                        $metadata_joins++;
+                                        $notstring = "(md{$metadata_joins}.`name`    = :name{$metadata_joins} and md{$metadata_joins}.`collection` = '{$collection}' and md{$metadata_joins}.`value` != :nonmdvalue{$non_md_variables}";
+                                        $variables[":name{$metadata_joins}"]         = $key;
+                                        $variables[":nonmdvalue{$non_md_variables}"] = $value['$not'];
+                                        $non_md_variables++;
                                     }
-                                    $notstring .= "))";
                                 }
                                 $subwhere[] = $notstring;
                             }
