@@ -456,9 +456,6 @@
                                 $variables[":value{$metadata_joins}"] = $value;
                             }
                         } else {
-                            if (!empty($value['$or'])) {
-                                $subwhere[] = "(" . $this->build_where_from_array($value['$or'], $variables, $metadata_joins, $non_md_variables, 'or', $collection) . ")";
-                            }
                             if (!empty($value['$not'])) {
                                 if (!empty($value['$not']['$in'])) {
 
@@ -494,7 +491,7 @@
                                         $non_md_variables++;
                                     } else {
                                         $metadata_joins++;
-                                        $notstring = "(md{$metadata_joins}.`name`    = :name{$metadata_joins} and md{$metadata_joins}.`collection` = '{$collection}' and md{$metadata_joins}.`value` != :nonmdvalue{$non_md_variables}";
+                                        $notstring = "(md{$metadata_joins}.`name`    = :name{$metadata_joins} and md{$metadata_joins}.`collection` = '{$collection}' and md{$metadata_joins}.`value` != :nonmdvalue{$non_md_variables})";
                                         $variables[":name{$metadata_joins}"]         = $key;
                                         $variables[":nonmdvalue{$non_md_variables}"] = $value['$not'];
                                         $non_md_variables++;
@@ -529,6 +526,9 @@
                                     $instring .= "))";
                                 }
                                 $subwhere[] = $instring;
+                            }
+                            if ($key == '$or') {
+                                $subwhere[] = "(" . $this->build_where_from_array($value, $variables, $metadata_joins, $non_md_variables, 'or', $collection) . ")";
                             }
                             if ($key == '$search') {
                                 if (!empty($value[0])) {
