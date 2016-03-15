@@ -61,8 +61,12 @@
                         <hr>
 
                         <?php
-                            $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-                            $path = str_replace('/','_',$path);
+                            if (isset($_SERVER['REQUEST_URI'])) {
+                                $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+                                $path = str_replace('/','_',$path);
+                            } else {
+                                $path = '';
+                            }
                         ?>
 
                         <em style="font-style:italic; font-size: 12px; color: #aaa;">Powered by <a href="https://withknown.com/?utm_source=transactional&utm_medium=email&utm_campaign=e<?=$path?>" style="color: #73b2e3; text-decoration: none;">Known</a>, the best way to publish content, discuss ideas, and share from a space you own.</em>
@@ -81,4 +85,3 @@
 <br>
 </body>
 </html>
-

@@ -20,14 +20,11 @@
 
             function post()
             {
-
-                parse_str(trim(file_get_contents("php://input")), $vars);
+                $source = $this->getInput('source');
+                $target = $this->getInput('target');
 
                 // Check that both source and target are non-empty
-                if (!empty($vars['source']) && !empty($vars['target']) && $vars['source'] != $vars['target']) {
-
-                    $source = $vars['source'];
-                    $target = $vars['target'];
+                if ($source && $target && $source !== $target) {
 
                     // Remove anchors from target URL, but save them to '#' input so we can still reference them later
                     if (strpos($target, '#')) {
@@ -51,14 +48,14 @@
                         // Check that source exists, parse it for mf2 content,
                         // and ensure that it genuinely mentions this page
                         if ($webmention_ok) {
-                            if ($source_content = \Idno\Core\Webservice::get($source)) {
+                            if ($source_content = \Idno\Core\Idno::site()->http()->get($source)) {
                                 if (substr_count($source_content['content'], $target) || $source_content['response'] == 410) {
                                     $source_mf2 = \Idno\Core\Webmention::parseContent($source_content['content'], $source);
                                     // Set source and target information as input variables
                                     $page->setPermalink();
                                     if ($page->webmentionContent($source, $target, $source_content, $source_mf2)) {
                                         $this->setResponse(202); // Webmention received a-ok.
-                                        exit;
+                                        return;
                                     } else {
                                         $error      = 'target_not_supported';
                                         $error_text = 'This is not webmentionable.';

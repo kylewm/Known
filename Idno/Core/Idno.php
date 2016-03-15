@@ -36,6 +36,7 @@
             public $helper_robot;
             public $reader;
             public $cache;
+            public $http;
 
             function __construct()
             {
@@ -113,6 +114,7 @@
                     $this->logging->setLogLevel($this->config->loglevel);
                 }
 
+                $this->http         = new CurlHttpClient();
                 $this->session      = new Session();
                 $this->actions      = new Actions();
                 $this->template     = new Template();
@@ -217,7 +219,7 @@
                 $this->addPageHandler('/begin/connect/?', '\Idno\Pages\Onboarding\Connect');
                 $this->addPageHandler('/begin/connect\-forwarder/?', '\Idno\Pages\Onboarding\ConnectForwarder');
                 $this->addPageHandler('/begin/publish/?', '\Idno\Pages\Onboarding\Publish');
-                
+
                 /** Add some services */
                 $this->addPageHandler('/service/db/optimise/?', '\Idno\Pages\Service\Db\Optimise');
                 $this->addPageHandler('/service/vendor/messages/?', '\Idno\Pages\Service\Vendor\Messages');
@@ -368,6 +370,15 @@
             function &template()
             {
                 return $this->template;
+            }
+
+            /**
+             * Return the HttpClient utility object for sending HTTP requests
+             * @Return \Idno\Core\HttpClient
+             */
+            function &http()
+            {
+                return $this->http;
             }
 
             /**
@@ -751,12 +762,12 @@
              */
             function getVendorMessages()
             {
-                
+
                 if (!empty(site()->config()->noping)) {
                     return '';
                 }
 
-                $results    = Webservice::post('https://withknown.com/vendor-services/messages/', array(
+                $results    = $this->http()->post('https://withknown.com/vendor-services/messages/', array(
                     'url'     => site()->config()->getURL(),
                     'title'   => site()->config()->getTitle(),
                     'version' => site()->getVersion(),

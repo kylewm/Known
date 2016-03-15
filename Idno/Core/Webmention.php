@@ -101,7 +101,7 @@
                 if (!is_array($inreplyto)) {
                     $inreplyto = array($inreplyto);
                 }
-                if ($content = \Idno\Core\Webservice::get($url)) {
+                if ($content = \Idno\Core\Idno::site()->http()->get($url)) {
                     if ($mf2 = self::parseContent($content['content'], $url)) {
                         $mf2         = (array)$mf2;
                         $mf2['rels'] = (array)$mf2['rels'];
@@ -171,7 +171,7 @@
              */
             static function getIconFromURL($url)
             {
-                if ($content = Webservice::get($url)) {
+                if ($content = \Idno\Core\Idno::site()->http()->get($url)) {
                     return self::getIconFromWebsiteContent($content['content'], $url);
                 }
 
@@ -203,7 +203,7 @@
                                                 //$mentions['owner']['photo'] = $item['properties']['photo'][0];
 
                                                 $tmpfname = tempnam(sys_get_temp_dir(), 'webmention_avatar');
-                                                file_put_contents($tmpfname, \Idno\Core\Webservice::file_get_contents($item['properties']['photo'][0]));
+                                                file_put_contents($tmpfname, \Idno\Core\Idno::site()->http()->file_get_contents($item['properties']['photo'][0]));
 
                                                 $name = md5($item['properties']['url'][0]);
 

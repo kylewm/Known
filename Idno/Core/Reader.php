@@ -140,7 +140,7 @@
                     return false;
                 }
 
-                if ($result = Webservice::get($url)) {
+                if ($result = \Idno\Core\Idno::site()->http()->get($url)) {
                     return $this->parseFeed($result['content'], $url);
                 }
 
@@ -162,7 +162,7 @@
                     return false;
                 }
 
-                if ($result = Webservice::get($url)) {
+                if ($result = \Idno\Core\Idno::site()->http()->get($url)) {
 
                     $feed = array();
 

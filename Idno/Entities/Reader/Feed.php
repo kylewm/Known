@@ -3,7 +3,6 @@
     namespace Idno\Entities\Reader {
 
         use Idno\Common\Entity;
-        use Idno\Core\Webservice;
 
         class Feed extends Entity
         {
@@ -72,7 +71,7 @@
              */
             function retrieveItems()
             {
-                if ($content = Webservice::get($this->getFeedURL())) {
+                if ($content = \Idno\Core\Idno::site()->http()->get($this->getFeedURL())) {
                     return \Idno\Core\Idno::site()->reader()->parseFeed($content['content'], $this->getFeedURL());
                 }
 

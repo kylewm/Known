@@ -19,7 +19,7 @@
 
                 $u = $this->getInput('u');
 
-                if ($content = \Idno\Core\Webservice::get($u)['content']) {
+                if ($content = \Idno\Core\Idno::site()->http()->get($u)['content']) {
 
                     $parser = new \Mf2\Parser($content, $u);
                     if ($return = $parser->parse()) {

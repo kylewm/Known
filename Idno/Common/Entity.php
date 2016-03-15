@@ -1660,7 +1660,7 @@
                                                 //$mentions['owner']['photo'] = $item['properties']['photo'][0];
 
                                                 $tmpfname = tempnam(sys_get_temp_dir(), 'webmention_avatar');
-                                                file_put_contents($tmpfname, \Idno\Core\Webservice::file_get_contents($item['properties']['photo'][0]));
+                                                file_put_contents($tmpfname, \Idno\Core\Idno::site()->http()->file_get_contents($item['properties']['photo'][0]));
 
                                                 $name = md5($item['properties']['url'][0]);
 
@@ -1786,7 +1786,7 @@
                                         //$mentions['owner']['photo'] = $author['properties']['photo'][0];
 
                                         $tmpfname = tempnam(sys_get_temp_dir(), 'webmention_avatar');
-                                        file_put_contents($tmpfname, \Idno\Core\Webservice::file_get_contents($author['properties']['photo'][0]));
+                                        file_put_contents($tmpfname, \Idno\Core\Idno::site()->http()->file_get_contents($author['properties']['photo'][0]));
 
                                         $name = md5($author['properties']['url'][0]);
 

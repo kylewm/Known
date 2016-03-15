@@ -111,7 +111,7 @@
                         $user->pubsub_pending   = serialize($pending);
                         $user->save();
 
-                        $return = \Idno\Core\Webservice::post($following->pubsub_hub, array(
+                        $return = \Idno\Core\Idno::site()->http()->post($following->pubsub_hub, array(
                             'hub.callback' => \Idno\Core\Idno::site()->config->url . 'pubsub/callback/' . $user->getID() . '/' . $following->getID(), // Callback, unique to each subscriber
                             'hub.mode'     => 'unsubscribe',
                             'hub.verify'   => 'async', // Backwards compatibility with v0.3 hubs
@@ -143,7 +143,7 @@
 
                 // Get page, if necessary
                 if (empty($page)) {
-                    $page = \Idno\Core\Webservice::file_get_contents($url);
+                    $page = \Idno\Core\Idno::site()->http()->file_get_contents($url);
                 }
 
                 // Find the feed in page
@@ -159,7 +159,7 @@
 
                 if ($feed) {
 
-                    $page = \Idno\Core\Webservice::file_get_contents($feed);
+                    $page = \Idno\Core\Idno::site()->http()->file_get_contents($feed);
 
                     // We may be looking on a feed
                     if (preg_match_all('/<atom:link href=["\']{1}([^"]+)["\']{1} rel=["\']{1}hub["\']{1}[\s]*\/?>/i', $page, $match)) {
@@ -186,7 +186,7 @@
                 $feed = null;
 
                 if (!$data)
-                    $data = \Idno\Core\Webservice::file_get_contents($url);
+                    $data = \Idno\Core\Idno::site()->http()->file_get_contents($url);
 
                 // search for all 'RSS Feed' declarations
                 if (preg_match_all('#<link[^>]+type="application/rss\+xml"[^>]*>#is', $data, $rawMatches)) {
@@ -216,7 +216,7 @@
 
                 // Find self
                 if ($feed) {
-                    $data = \Idno\Core\Webservice::file_get_contents($feed);
+                    $data = \Idno\Core\Idno::site()->http()->file_get_contents($feed);
 
                     if (preg_match('/<atom:link[^>]+href="([^"]+)"[^>]*rel="self"[^>]*>/i', $data, $match)) {
                         $self = $match[1];
@@ -280,7 +280,7 @@
 
                         $formdata = 'hub.mode=publish&hub.url=' . implode(',', $encurls);
                         \Idno\Core\Idno::site()->logging()->info('Pinging ' . $hub . ' with data ' . $formdata);
-                        \Idno\Core\Webservice::post($hub, $formdata, array(
+                        \Idno\Core\Idno::site()->http()->post($hub, $formdata, array(
                             'Content-Type' => 'application/x-www-form-urlencoded'));
                     }
 

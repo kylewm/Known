@@ -6,8 +6,6 @@
 
     namespace Idno\Pages\Account\Settings {
 
-        use Idno\Core\Webservice;
-
         class Feedback extends \Idno\Common\Page
         {
 
@@ -29,7 +27,7 @@
 
                 if (!empty($email) && !empty($message)) {
 
-                    $results    = Webservice::post('https://withknown.com/vendor-services/feedback/', array(
+                    $results    = \Idno\Core\Idno::site()->http()->post('https://withknown.com/vendor-services/feedback/', array(
                         'url'     => \Idno\Core\Idno::site()->config()->getURL(),
                         'title'   => \Idno\Core\Idno::site()->config()->getTitle(),
                         'version' => \Idno\Core\Idno::site()->getVersion(),

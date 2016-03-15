@@ -18,7 +18,7 @@
             protected static function _post($url, $body, $headers = array(), $returnHTTPCode = false)
             {
 
-                $result = Webservice::post($url, $body, $headers);
+                $result = \Idno\Core\Idno::site()->http()->post($url, $body, $headers);
 
                 if ($returnHTTPCode)
                     return $result['response'];
@@ -28,7 +28,7 @@
 
             protected function _fetchHead($url)
             {
-                $response = Webservice::get($url);
+                $response = \Idno\Core\Idno::site()->http()->get($url);
                 if (!empty($response['headers'])) {
                     return $this->_parse_headers($response['headers']);
                 }
@@ -43,7 +43,7 @@
 
             protected static function _get($url)
             {
-                return Webservice::get($url)['content'];
+                return \Idno\Core\Idno::site()->http()->get($url)['content'];
             }
 
         }
