@@ -51,12 +51,12 @@
                         // Check that source exists, parse it for mf2 content,
                         // and ensure that it genuinely mentions this page
                         if ($webmention_ok) {
-                            if ($source_content = \Idno\Core\Webservice::get($source)) {
-                                if (substr_count($source_content['content'], $target) || $source_content['response'] == 410) {
-                                    $source_mf2 = \Idno\Core\Webmention::parseContent($source_content['content'], $source);
+                            if ($source_response = \Idno\Core\Webservice::get($source)) {
+                                if (substr_count($source_response['content'], $target) || $source_response['response'] == 410) {
+                                    $source_mf2 = \Idno\Core\Webmention::parseContent($source_response['content'], $source);
                                     // Set source and target information as input variables
                                     $page->setPermalink();
-                                    if ($page->webmentionContent($source, $target, $source_content, $source_mf2)) {
+                                    if ($page->webmentionContent($source, $target, $source_response, $source_mf2)) {
                                         $this->setResponse(202); // Webmention received a-ok.
                                         exit;
                                     } else {
