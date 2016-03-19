@@ -152,7 +152,7 @@
                 $types = (array) $types;
 
                 $items = [];
-                foreach ($source_mf2['items'] as $item) {
+                foreach ($mf2['items'] as $item) {
                     foreach ($types as $type) {
                         if (isset($item['type']) && in_array($type, $item['type'])) {
                             $items[] = $item;
@@ -170,7 +170,7 @@
                 // ... unless one of the entry's "url" values is the current page
                 if (count($items) > 1) {
                     foreach ($items as $item) {
-                        if (!empty($item['properties']['url']) && in_array($source, $item['properties']['url'])) {
+                        if (!empty($item['properties']['url']) && in_array($url, $item['properties']['url'])) {
                             return $item;
                         }
                     }
@@ -213,7 +213,7 @@
                 // fallback to top-level hcard if there is 1 and only 1
                 // TODO follow http://indiewebcamp.com/authorship
                 $hcards = [];
-                foreach ($source_mf2['items'] as $item) {
+                foreach ($mf2['items'] as $item) {
                     if (isset($item['type']) && in_array('h-card', $item['type'])) {
                         $hcards[] = $item;
                     }
