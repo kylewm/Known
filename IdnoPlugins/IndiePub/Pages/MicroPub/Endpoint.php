@@ -100,8 +100,10 @@
                             echo "Failed uploading photo from $photo_url";
                             exit;
                         }
-                    } else if (!empty($name)) {
+                    } else if ($name) {
                         $type = 'article';
+                    } else if ($in_reply_to) {
+                        $type = 'reply';
                     }
                 }
                 if ($type == 'checkin')  {
