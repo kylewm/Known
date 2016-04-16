@@ -54,12 +54,12 @@ img {
     height: auto;
 }
 
-.e-content p {
+.idno-body p {
 	font-family: Georgia,"Times New Roman",Times,serif;
 	font-size: 1.2em;
 }
 
-.idno-object .e-content li {
+.idno-object .idno-body li {
 	font-family: Georgia,"Times New Roman",Times,serif;
 	font-size: 1.2em;
 	line-height: 1.4em;
@@ -194,7 +194,7 @@ img {
 
 }
 
-.idno-object .e-content {
+.idno-object .idno-body {
     overflow: auto;
     margin-bottom: 1em;
     padding-top: 0em;
@@ -202,7 +202,7 @@ img {
     font-size: 1em;
 }
 
-.idno-object .e-content blockquote p {
+.idno-object .idno-body blockquote p {
     font-size: 1.1em;
     line-height: 1.6em;
     margin-bottom: 1em;
@@ -262,7 +262,7 @@ img {
     text-align: left;
 }
 
-.h-cite .e-content {
+.h-cite .idno-body {
     margin-bottom: 0;
 }
 
