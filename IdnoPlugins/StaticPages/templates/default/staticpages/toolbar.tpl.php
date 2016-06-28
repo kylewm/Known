@@ -31,7 +31,7 @@
                         // If the category's only element is a the homepage, we should suppress it rather than showing
                         // an empty dropdown. At this point, the array is proven to be non-empty so there's no need to
                         // guard for that here.
-                        if ( count($pages) > 1 || !array_values($pages)[0]->isHomepage() ) {
+                        if ( count($pages) > 1 || (!empty($pages) && !array_values($pages)[0]->isHomepage())) {
                             ?>
 
                            <li>
